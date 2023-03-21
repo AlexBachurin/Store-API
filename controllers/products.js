@@ -35,6 +35,13 @@ const getAllProducts = async (req, res) => {
     const fieldsList = fields.split(",").join(" ");
     result = result.select(fieldsList);
   }
+  // Pagination, page and limit
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  // skip to implement pagination logic, if we on page 2, then we skip first 10 items
+  // so we displaying next 10 items for page 2
+  const skip = (page - 1) * limit;
+  result = result.limit(limit).skip(skip);
   const products = await result;
   res.status(200).json({ products, nbHits: products.length });
 };
