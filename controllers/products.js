@@ -7,7 +7,7 @@ const getAllProductsStatic = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   // this way we wont get empty array in return if query params doesnt exist
-  const { featured, company, name } = req.query;
+  const { featured, company, name, sort } = req.query;
   // if user isnt looking for queries that in the schema,
   // then we will use Model.Find({}) with empty object and get all items back
   const queryObject = {};
@@ -20,7 +20,16 @@ const getAllProducts = async (req, res) => {
   if (name) {
     queryObject.name = { $regex: name, $options: "i" };
   }
-  const products = await ProductModel.find(queryObject);
+  let result = ProductModel.find(queryObject);
+  if (sort) {
+    // split and join together if there is more than 1 sort query(e.g. name,price)
+    const sortList = sort.split(",").join(" ");
+    result = result.sort(sortList);
+  } else {
+    // if sort not provided then just sort by something by default
+    result = result.sort("createdAt");
+  }
+  const products = await result;
   res.status(200).json({ products, nbHits: products.length });
 };
 
